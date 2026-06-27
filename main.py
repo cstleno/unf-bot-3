@@ -4,6 +4,8 @@ from discord.ui import Button, View
 import os
 from dotenv import load_dotenv
 import datetime
+from flask import Flask
+import threading
 
 load_dotenv()
 
@@ -22,6 +24,18 @@ intents.members = True
 intents.message_content = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
+
+# Render Port Hatasını Çözmek İçin Web Sunucusu Kurulumu
+app = Flask('')
+
+@app.route('/')
+def home():
+    return "Bot aktif ve calisiyor!"
+
+def run_web_server():
+    # Render'ın atadığı portu alıyoruz, bulamazsa varsayılan 8080 portunu açıyoruz
+    port = int(os.environ.get("PORT", 8080))
+    app.run(host='0.0.0.0', port=port)
 
 class TicketView(View):
     def __init__(self):
@@ -74,11 +88,12 @@ class CloseView(View):
 
         log = interaction.guild.get_channel(LOG_CHANNEL_ID)
 
+        # DeprecationWarning uyarısı veren utcnow() kısmı güncellendi
         embed = discord.Embed(
             title="Ticket Kapatıldı",
             description=f"Kapatan: {interaction.user.mention}\nKanal: {interaction.channel.name}",
             color=0xff0000,
-            timestamp=datetime.datetime.utcnow()
+            timestamp=datetime.datetime.now(datetime.timezone.utc)
         )
 
         await log.send(embed=embed)
@@ -113,4 +128,7 @@ async def panel(ctx):
     await ctx.send(embed=embed, view=TicketView())
 
 
-bot.run(TOKEN)
+if __name__ == "__main__":
+    # Web sunucusunu bot başlamadan hemen önce ayrı bir thread olarak çalıştırıyoruz
+    threading.Thread(target=run_web_server, daemon=True).start()
+    bot.run(TOKEN)
