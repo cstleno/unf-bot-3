@@ -1,6 +1,0 @@
-services:
-  - type: worker
-    name: unfortune-ticket-bot
-    env: node
-    buildCommand: npm install
-    startCommand: npm start
