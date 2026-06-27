@@ -57,7 +57,7 @@ class TicketView(View):
             color=0x2b2d31
         )
 
-        await channel.send(embed=embed, view=CloseView())
+        await channel.send(content=f"<@&{STAFF_ROLE_ID}>", embed=embed, view=CloseView())
         await interaction.response.send_message(f"Ticket açıldı: {channel.mention}", ephemeral=True)
 
 
